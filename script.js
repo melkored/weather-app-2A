@@ -3,7 +3,10 @@ const appID = "06d12b314bb4c17941caf958f729dcdd";
 const weatherBaseApi = "http://api.openweathermap.org/data/2.5/weather";
 const geocodingBaseApi = "http://api.openweathermap.org/geo/1.0/direct";
 
-async function getWeatherConditions(lat, lng) {
+const inputSearch = document.getElementById("city-name");
+const searchButton = document.getElementById("search-button");
+
+async function getWeatherConditionsByPosition(lat, lng) {
   try {
     const response = await fetch(
       `${weatherBaseApi}?lat=${lat}&lon=${lng}&lang=es&units=metric&appid=${appID}`
@@ -20,10 +23,27 @@ async function getWeatherConditions(lat, lng) {
   }
 }
 
+async function getWeatherConditionsByCityName(city) {
+  try {
+    const response = await fetch(
+      `${geocodingBaseApi}?q=${city}&limit=5&appid=${appID}`
+    );
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("DATA City", data);
+    return data;
+  } catch (error) {
+    console.log("ERROR City", error);
+    return error;
+  }
+}
+
 async function success(position) {
   const { longitude, latitude } = position.coords;
   try {
-    await getWeatherConditions(latitude, longitude);
+    await getWeatherConditionsByPosition(latitude, longitude);
   } catch (error) {
     console.log("ERROR", error);
   } finally {
@@ -41,8 +61,14 @@ options = {
   maximumAge: 0,
 };
 
-if (navigator.geolocation) {
-  nav = navigator.geolocation.watchPosition(success, error, options);
-} else {
-  console.error("Geolocalización no soportada en este navegador");
-}
+searchButton.addEventListener("click", function () {
+  let cityNameValue = inputSearch.value;
+  console.log("Value", cityNameValue);
+  getWeatherConditionsByCityName(cityNameValue);
+});
+
+// if (navigator.geolocation) {
+//   nav = navigator.geolocation.watchPosition(success, error, options);
+// } else {
+//   console.error("Geolocalización no soportada en este navegador");
+// }
