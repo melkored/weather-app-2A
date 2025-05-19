@@ -3,8 +3,11 @@ const appID = "06d12b314bb4c17941caf958f729dcdd";
 const weatherBaseApi = "http://api.openweathermap.org/data/2.5/weather";
 const geocodingBaseApi = "http://api.openweathermap.org/geo/1.0/direct";
 
+const weatherForm = document.getElementById("search-form");
 const inputSearch = document.getElementById("city-name");
 const searchButton = document.getElementById("search-button");
+
+function showOptionCity() {}
 
 async function getWeatherConditionsByPosition(lat, lng) {
   try {
@@ -23,7 +26,7 @@ async function getWeatherConditionsByPosition(lat, lng) {
   }
 }
 
-async function getWeatherConditionsByCityName(city) {
+async function getCityOptions(city) {
   try {
     const response = await fetch(
       `${geocodingBaseApi}?q=${city}&limit=5&appid=${appID}`
@@ -61,10 +64,24 @@ options = {
   maximumAge: 0,
 };
 
-searchButton.addEventListener("click", function () {
-  let cityNameValue = inputSearch.value;
+searchButton.addEventListener("click", function (event) {
+  event.preventDefault();
+  let cityNameValue = inputSearch.value.trim();
+  if (cityNameValue) {
+    getCityOptions(cityNameValue).catch(function () {
+      console.error("Error en búsqueda", error);
+    });
+  } else {
+    console.log("Enter a city Name");
+  }
   console.log("Value", cityNameValue);
-  getWeatherConditionsByCityName(cityNameValue);
+});
+
+weatherForm.addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    searchButton.click();
+  }
 });
 
 // if (navigator.geolocation) {
